@@ -1,2 +1,2 @@
 # ComputeDistance
-Compute distance between camera and object with known distance and size.
+Compute distance between camera and object with known distance and size with webcamera.
