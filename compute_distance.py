@@ -45,9 +45,12 @@ def find_markers_without_reducing_noise(image):
             markers.append(cv2.minAreaRect(c))
     return markers
 
-def distance_to_camera(knownWidth, focalLength, perWidth):
+def compute_distance_to_camera(knownWidth, focalLength, perWidth):
 	# compute and return the distance from the maker to the camera
 	return (knownWidth * focalLength) / perWidth
+
+def compute_pixel_by_radian_and_distance(radian, distance):
+    pass
 
 if __name__ == '__main__':
     cap = cv2.VideoCapture(0)
@@ -84,7 +87,7 @@ if __name__ == '__main__':
                 for m in markers:
                     per_w = m[1][0]
                     print("index: "+str(index)+" per width: "+str(per_w)+" getting markers took : "+str(e_time-s_time)+" ms")
-                    centi = distance_to_camera(KNOWN_WIDTH, focalLength, per_w)
+                    centi = compute_distance_to_camera(KNOWN_WIDTH, focalLength, per_w)
                     array_of_distance.append(centi)
                     if len(array_of_distance) >= MAX_LENGTH_OF_MEAN_DISTANCE:
                         mean_distance = np.mean(array_of_distance)
@@ -93,13 +96,13 @@ if __name__ == '__main__':
                         mean_array_of_distance.append({current_epoc: mean_distance})
                         length_mean_array_of_pos = len(mean_array_of_pos)
                         length_mean_array_of_distance = len(mean_array_of_distance)
-                        # compute diffrence betweeen current one and first one
+                        # compute difference betweeen current one and first one
                         if length_mean_array_of_pos > 1:
-                            diff_pos = mean_array_of_pos[0].get(0, 0)-mean_array_of_pos[length_mean_array_of_pos-1].get(current_epoc,0)
-                            print("diff pos: "+str(diff_pos))
+                            diff_pos = mean_array_of_pos[0].get(0, 0) - mean_array_of_pos[length_mean_array_of_pos - 1].get(current_epoc, 0)
+                            print("epoc: "+str(current_epoc)+" diff pos: "+str(diff_pos))
                         if length_mean_array_of_distance > 1:
-                            diff_dis = mean_array_of_distance[0].get(0, 0)-mean_array_of_distance[length_mean_array_of_distance-1].get(current_epoc,0)
-                            print("diff dis: "+str(diff_dis))
+                            diff_dis = mean_array_of_distance[0].get(0, 0) - mean_array_of_distance[length_mean_array_of_distance - 1].get(current_epoc, 0)
+                            print("epoc: "+str(current_epoc)+" diff dis: "+str(diff_dis))
                         array_of_distance = []
                         array_of_pos = []
                         current_epoc += 1
