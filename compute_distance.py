@@ -3,6 +3,12 @@ import numpy as np
 import cv2
 import time
 
+
+
+def get_radian():
+    return [0.1,0.2,0.3]
+
+
 def find_markers_with_reducing_noise(image):
     # multiple cascades: https://github.com/Itseez/opencv/tree/master/data/haarcascades
     #https://github.com/Itseez/opencv/blob/master/data/haarcascades/haarcascade_frontalface_default.xml
@@ -13,6 +19,7 @@ def find_markers_with_reducing_noise(image):
     for (x,y,w,h) in faces:
         roi_gray = image_gray[y:y+h, x:x+w]
         print("fx:"+str(x)+" fy:"+str(y)+" fw:"+str(w)+" fh:"+str(h))
+        array_of_angle.append(get_radian())
         cv2.rectangle(image,(x,y),(x+w,y+h),(255,0,0),2)
 		# finds edges in an image using the Canny86 algorithm if needed.
         roi_gray = cv2.GaussianBlur(roi_gray, (5, 5), 0)
@@ -36,6 +43,7 @@ def find_markers_without_reducing_noise(image):
         roi_gray = image_gray[y:y+h, x:x+w]
         print("fx:"+str(x)+" fy:"+str(y)+" fw:"+str(w)+" fh:"+str(h))
         array_of_pos.append([x,y])
+        array_of_angle.append(get_radian())
         cv2.rectangle(image,(x,y),(x+w,y+h),(255,0,0),2)
         roi_gray = cv2.GaussianBlur(roi_gray, (5, 5), 0)
         if roi_gray.any():
@@ -49,7 +57,7 @@ def compute_distance_to_camera(knownWidth, focalLength, perWidth):
 	# compute and return the distance from the maker to the camera
 	return (knownWidth * focalLength) / perWidth
 
-def compute_pixel_by_radian_and_distance(radian, distance):
+def compute_pixel_by_radian_and_distance(degree, distance):
     pass
 
 if __name__ == '__main__':
@@ -61,6 +69,7 @@ if __name__ == '__main__':
     THRESHOLD_MOVEMENT_Y = 50.0
     array_of_distance = []
     array_of_pos = []
+    array_of_angle = []
     mean_array_of_distance = []
     mean_array_of_pos = []
     current_epoc = 0
@@ -99,12 +108,14 @@ if __name__ == '__main__':
                         # compute difference betweeen current one and first one
                         if length_mean_array_of_pos > 1:
                             diff_pos = mean_array_of_pos[0].get(0, 0) - mean_array_of_pos[length_mean_array_of_pos - 1].get(current_epoc, 0)
-                            print("epoc: "+str(current_epoc)+" diff pos: "+str(diff_pos))
+                            diff_radian = np.array(array_of_angle[0]) - np.array(array_of_angle[len(array_of_angle)-1])
+                            print("epoc: "+str(current_epoc)+" diff pos: "+str(diff_pos)+" diff radian: "+str(diff_radian))
                         if length_mean_array_of_distance > 1:
                             diff_dis = mean_array_of_distance[0].get(0, 0) - mean_array_of_distance[length_mean_array_of_distance - 1].get(current_epoc, 0)
                             print("epoc: "+str(current_epoc)+" diff dis: "+str(diff_dis))
                         array_of_distance = []
                         array_of_pos = []
+                        array_of_angle = []
                         current_epoc += 1
                         if current_epoc % MAX_EPOC == 0:
                             mean_array_of_pos = []
